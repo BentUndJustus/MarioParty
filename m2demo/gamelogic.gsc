@@ -129,6 +129,7 @@ deleteLobby()
 	self.lobbyText destroy();
    
 	self SetOrigin( (1000,1000,1000) );
+	level.gameRunning=true;
 	self thread dogame();
 }
 
@@ -139,23 +140,63 @@ dogame()
 	{
 		self spielbrett::create();
 		self wuerfeln();
-		self minigames/spleef::init();
+		self minigames\spleef::init();
 
 		self spielbrett::create();
 		self wuerfeln();
-		self minigames/dm::init();
+		self minigames\dm::init();
 		
 		self spielbrett::create();
 		self wuerfeln();
-		self minigames/rennen::init();
+		self minigames\rennen::init();
 		
 		self spielbrett::create();
 		self wuerfeln();
-		self minigames::gungame();
+		self minigames\gungame::init();
+		wait 0.1;
+	}
+}
+
+wuerfeln()
+{	
+	self.wuerfel=true;
+	self thread wurf();
+	// self.wuerfelhud = createRectangle("CENTER", "MIDDLE", 0, 0, 100, 50, (0.40, 0.40, 0.40), "white",0 ,0.5);
+	// self.wuefeltext = self createFontString( "default", 1.5, self );
+	// self.wuefeltext.X = 300;
+	// self.wuefeltext.Y = 100;
+	self.zahl = 1;
+	self thread maps\mp\gametypes\_hud_message::hintMessage("Roll the Dice");
+	wait 1;
+
+	while(self.wuerfel) 
+	{	
+		if(self.zahl>5) {self.zahl=1;}
+		else {self.zahl++;}
+		// self.wuefeltext setText(self.zahl);
+		self iprintlnBold(self.zahl);
+		
+		wait 0.1;
+	}
+	self.currentfeld=self.zahl+self.currentfeld;
+	self spielbrett::move(self.currentfeld);
+	if (self.currentfeld>=50)
+	{
+		self thread win();
 	}
 }	
 
+wurf()
+{	
+	self notifyOnPlayerCommand("n", "+actionslot 1");
+	self waittill("n");
+	self.wuerfel=false;
+}
 
+win()
+{
+	self iprintlnBold("^2WINNER!!!");
+}
 
 
 /////Baufunktionen-------------------------------------
